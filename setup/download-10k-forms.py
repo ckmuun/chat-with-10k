@@ -4,7 +4,11 @@ print("Downloading 10k forms")
 dl = Downloader("university", "my.email@domain.com")
 
 
-ticker_list = ["MSFT", "AAPL", "GOOG", "AMZN", "NV"]
-dl.get("10-K", "MSFT", limit=1)
+ticker_list = ["MSFT", "AAPL", "GOOG", "AMZN", "NVDA", "AAL", "A", "TGT", "KO", "MMM", "HOG", "LUV", "C", "TXN" ]
+
+
+for ticker in ticker_list:
+    print("Downloading " + ticker)
+    dl.get("10-K", ticker, limit=1)
 
 
