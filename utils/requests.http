@@ -1,0 +1,6 @@
+###
+POST http://localhost:8080/send-message
+Accept: application/json, text/plain, */*
+Content-Type: application/json
+
+"what is 2+2"
