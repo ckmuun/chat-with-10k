@@ -25,6 +25,16 @@ class ChatControllerTest {
     private ChatService chatService;
 
     @Test
+    void test_hello() {
+        webTestClient.get().uri("/hello")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class)
+                .value(Assertions::assertNotNull)
+                .value(ret -> Assertions.assertEquals("Hello World!", ret));
+    }
+
+    @Test
     void sendMessage_statusOk() {
         webTestClient.post().uri("/send-message")
                 .body(BodyInserters.fromValue(""))
