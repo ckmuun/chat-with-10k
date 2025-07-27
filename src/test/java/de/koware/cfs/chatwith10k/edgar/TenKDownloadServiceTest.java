@@ -9,10 +9,10 @@ import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 @SpringBootTest(classes = {TenKDownloadService.class, WebClientConfig.class})
@@ -39,5 +39,37 @@ class TenKDownloadServiceTest {
         assertThat(tickers).isNotNull();
         assertFalse(tickers.isEmpty());
         assertEquals(52, tickers.size());
+    }
+
+
+    @Test
+    void parseFilings_3M() throws IOException {
+        var resource = new ClassPathResource("filings.json");
+
+        var filings = downloadService.parseFilings(resource.getContentAsString(StandardCharsets.UTF_8));
+
+        assertThat(filings).isNotNull();
+        assertFalse(filings.isEmpty());
+        assertEquals(1000, filings.size());
+
+        var firstFiling = filings.getFirst();
+
+        assertThat(firstFiling).isNotNull();
+        assertEquals("4", firstFiling.coreType());
+    }
+
+    @Test
+    void fetchFilings_3M() {
+
+        var cik = "66740";
+        var filings = downloadService.getCompanyFilings(cik).block();
+
+        assertNotNull(filings);
+        assertEquals(1000, filings.size());
+
+        var firstFiling = filings.getFirst();
+
+        assertThat(firstFiling).isNotNull();
+        assertEquals("4", firstFiling.coreType());
     }
 }
