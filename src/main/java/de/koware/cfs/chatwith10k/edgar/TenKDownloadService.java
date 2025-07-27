@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import de.koware.cfs.chatwith10k.config.Constants;
 import lombok.extern.slf4j.Slf4j;
 import net.thisptr.jackson.jq.BuiltinFunctionLoader;
 import net.thisptr.jackson.jq.JsonQuery;
@@ -25,25 +26,25 @@ public class TenKDownloadService {
 
     private final WebClient webClient;
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final Scope rootScope = Scope.newEmptyScope();
+
+
     public TenKDownloadService(WebClient webClient) {
         this.webClient = webClient;
+        BuiltinFunctionLoader.getInstance().loadFunctions(Versions.JQ_1_6, rootScope);
+        rootScope.setModuleLoader(BuiltinModuleLoader.getInstance());
     }
 
     public Mono<List<CompanyTickerDto>> getCompanyTickers() {
         return webClient.get()
-                .uri("/files/company_tickers_exchange.json")
+                .uri(Constants.TICKER_FILE_PATH)
                 .retrieve()
                 .bodyToMono(String.class)
                 .map(this::parseCompanyTickerDtos);
     }
 
     protected List<CompanyTickerDto> parseCompanyTickerDtos(String rawResponse) {
-        // todo put this into some static/singleton bean
-        ObjectMapper objectMapper = new ObjectMapper();
-        Scope rootScope = Scope.newEmptyScope();
-        BuiltinFunctionLoader.getInstance().loadFunctions(Versions.JQ_1_6, rootScope);
-        rootScope.setModuleLoader(BuiltinModuleLoader.getInstance());
-
         JsonQuery getDataQuery;
         try {
             Scope childScope = Scope.newChildScope(rootScope);
@@ -54,7 +55,6 @@ public class TenKDownloadService {
             final List<JsonNode> out = new ArrayList<>();
             getDataQuery.apply(childScope, edgarResponse, out::add);
 
-
             return out.stream().map(
                     this::parseCompanyTickerDto
             ).collect(Collectors.toList());
@@ -64,6 +64,13 @@ public class TenKDownloadService {
         }
     }
 
+    /*
+        The tickers come as valid, but rather strangely formatted JSON.
+        All fields are in an array, in a certain order, but without any
+        key-value semantics. The top-level JSON has one child element which
+        describes the array formatting.
+        Basically, this is CSV semantics in JSON syntax.
+     */
     private CompanyTickerDto parseCompanyTickerDto(JsonNode node) {
         var arraynode = (ArrayNode) node;
         var iter = arraynode.elements();
@@ -72,6 +79,6 @@ public class TenKDownloadService {
         var ticker = iter.next().asText();
         var exchange = iter.next().asText();
 
-        return  new CompanyTickerDto(cik, name, ticker, exchange);
+        return new CompanyTickerDto(cik, name, ticker, exchange);
     }
 }
