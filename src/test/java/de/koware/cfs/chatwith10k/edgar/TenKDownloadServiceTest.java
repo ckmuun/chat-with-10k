@@ -6,7 +6,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
+import org.testcontainers.shaded.com.google.common.io.Files;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -56,6 +60,59 @@ class TenKDownloadServiceTest {
 
         assertThat(firstFiling).isNotNull();
         assertEquals("4", firstFiling.coreType());
+    }
+
+    @Test
+    void parseFilings_3M_10k() throws IOException {
+        var resource = new ClassPathResource("filings.json");
+
+        var filings = downloadService.parseFilings(resource.getContentAsString(StandardCharsets.UTF_8));
+
+        assertThat(filings).isNotNull();
+        assertFalse(filings.isEmpty());
+        assertEquals(1000, filings.size());
+
+        var tenKOpt = filings.stream().filter(
+                f -> f.form().equals("10-K")
+        ).findFirst();
+
+        assertThat(tenKOpt).isNotNull();
+        assertTrue(tenKOpt.isPresent());
+
+        var tenk = tenKOpt.get();
+        assertThat(tenk).isNotNull();
+        assertEquals("10-K", tenk.form());
+    }
+
+    @Test
+    void fetch10KForm_3M() throws IOException {
+        var metadata = CompanyFilingMetadataDto.builder()
+                .accessionNumber("0000066740-25-000006")
+                .primaryDocument("mmm-20241231.htm")
+                .cik("0000066740")
+                .build();
+
+        var tenKFormFiling = downloadService.getCompanyFiling(metadata).block();
+        assertThat(tenKFormFiling).isNotNull();
+
+        assertNotNull(tenKFormFiling);
+        byte[] data = tenKFormFiling.file().readAllBytes();
+        assertThat(data).isNotEmpty();
+
+        // local development only
+//        writeToDisk(data, "3M.html");
+    }
+
+    private void writeToDisk(byte[] data, String filename) throws IOException {
+        String homeDir = System.getProperty("user.home");
+        // Create the file object
+        File file = new File(homeDir, filename);
+
+        // Write the byte array to the file
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            fos.write(data);
+        }
+        System.out.println("File written to: " + file.getAbsolutePath());
     }
 
     @Test

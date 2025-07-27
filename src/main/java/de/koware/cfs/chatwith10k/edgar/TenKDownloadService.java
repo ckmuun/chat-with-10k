@@ -11,10 +11,13 @@ import net.thisptr.jackson.jq.Scope;
 import net.thisptr.jackson.jq.Versions;
 import net.thisptr.jackson.jq.exception.JsonQueryException;
 import net.thisptr.jackson.jq.module.loaders.BuiltinModuleLoader;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,13 +47,29 @@ public class TenKDownloadService {
                 .map(this::parseCompanyTickerDtos);
     }
 
-    public Mono<List<CompanyFilingDto>> getCompanyFilings(String cik) {
+    public Mono<List<CompanyFilingMetadataDto>> getCompanyFilings(String cik) {
         cik = addLeadingToZeroesToCik(cik);
         return webClient.get()
                 .uri(SEC_BASE_DATA + "/submissions/CIK{cik}.json", cik)
                 .retrieve()
                 .bodyToMono(String.class)
                 .map(this::parseFilings);
+    }
+
+    public Mono<CompanyFilingDto> getCompanyFiling(CompanyFilingMetadataDto metadata) {
+        var cik = removeLeadingZeroesFromCik(metadata.cik());
+        var accessionNumber = metadata.accessionNumber().replace("-", "");
+        var filename = metadata.primaryDocument();
+        return webClient.get()
+                .uri(SEC_BASE + "/Archives/edgar/data/{cik}/{accessionNumber}/{filename}", cik, accessionNumber, filename)
+                .retrieve()
+                .bodyToFlux(DataBuffer.class)
+                .reduce(DataBuffer::write)
+                .map(dataBuffer -> new CompanyFilingDto(metadata, dataBuffer.asInputStream()));
+    }
+
+    private String removeLeadingZeroesFromCik(String cik) {
+        return cik.replaceFirst("^0+(?!$)", "");
     }
 
     private String addLeadingToZeroesToCik(String cik) {
@@ -62,7 +81,7 @@ public class TenKDownloadService {
         return cikBuilder.toString();
     }
 
-    protected List<CompanyFilingDto> parseFilings(String rawResponse) {
+    protected List<CompanyFilingMetadataDto> parseFilings(String rawResponse) {
 
         try {
             var prefix = ".filings.recent";
@@ -93,10 +112,10 @@ public class TenKDownloadService {
 
             int length = accessionNumbers.size();
 
-            ArrayList<CompanyFilingDto> filings = new ArrayList<>(length);
+            ArrayList<CompanyFilingMetadataDto> filings = new ArrayList<>(length);
 
             for (int i = 0; i < length; i++) {
-                filings.add(new CompanyFilingDto(
+                filings.add(new CompanyFilingMetadataDto(
                         cik,
                         name,
                         accessionNumbers.get(i),
