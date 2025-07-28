@@ -16,8 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,14 +24,14 @@ import static de.koware.cfs.chatwith10k.config.Constants.*;
 
 @Service
 @Slf4j
-public class TenKDownloadService {
-
+public class DownloadService {
 
     private final WebClient webClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Scope rootScope = Scope.newEmptyScope();
 
-    public TenKDownloadService(WebClient webClient) {
+    private static final String ONE = "1";
+    public DownloadService(WebClient webClient) {
         this.webClient = webClient;
         BuiltinFunctionLoader.getInstance().loadFunctions(Versions.JQ_1_6, rootScope);
         rootScope.setModuleLoader(BuiltinModuleLoader.getInstance());
@@ -129,8 +127,8 @@ public class TenKDownloadService {
                         items.get(i),
                         coreTypes.get(i),
                         sizes.get(i),
-                        isXbrls.get(i).equals("1"),
-                        isInlineXbrls.get(i).equals("1"),
+                        isXbrls.get(i).equals(ONE),
+                        isInlineXbrls.get(i).equals(ONE),
                         primaryDocuments.get(i),
                         primaryDocumentDescriptions.get(i)
                 ));

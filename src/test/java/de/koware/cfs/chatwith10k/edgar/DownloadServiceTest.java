@@ -6,10 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
-import org.testcontainers.shaded.com.google.common.io.Files;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -19,12 +17,12 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 
-@SpringBootTest(classes = {TenKDownloadService.class, WebClientConfig.class})
+@SpringBootTest(classes = {DownloadService.class, WebClientConfig.class})
 @Slf4j
-class TenKDownloadServiceTest {
+class DownloadServiceTest {
 
     @Autowired
-    private TenKDownloadService downloadService;
+    private DownloadService downloadService;
 
     @Test
     void getCompanyTickers_basic() {
@@ -103,17 +101,7 @@ class TenKDownloadServiceTest {
 //        writeToDisk(data, "3M.html");
     }
 
-    private void writeToDisk(byte[] data, String filename) throws IOException {
-        String homeDir = System.getProperty("user.home");
-        // Create the file object
-        File file = new File(homeDir, filename);
 
-        // Write the byte array to the file
-        try (FileOutputStream fos = new FileOutputStream(file)) {
-            fos.write(data);
-        }
-        System.out.println("File written to: " + file.getAbsolutePath());
-    }
 
     @Test
     void fetchFilings_3M() {
