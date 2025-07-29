@@ -43,37 +43,36 @@ public class ParsingService {
             throw new IllegalArgumentException("Currently only 10-K forms supported");
         }
 
-        var currentOpt = getFormItemFromHtml(htmlDocument, Pattern.compile(FORM_10K_ITEMS_REGEX));
-
-        while (currentOpt.isPresent()) {
-            documents.add(currentOpt.get());
-            currentOpt = getFormItemFromHtml(htmlDocument, Pattern.compile(FORM_10K_ITEMS_REGEX));
-        }
+        var formItems = getFormItemsFromHtml(htmlDocument, Pattern.compile(FORM_10K_ITEMS_REGEX));
+        documents.addAll(formItems);
         return documents;
     }
 
-    protected Optional<Document> getFormItemFromHtml(org.jsoup.nodes.Document htmlDocument, Pattern separatorRegex) {
-        return getFormItemFromHtml(htmlDocument, separatorRegex, separatorRegex);
+    protected List<Document> getFormItemsFromHtml(org.jsoup.nodes.Document htmlDocument, Pattern separatorRegex) {
+        return getFormItemsFromHtml(htmlDocument, separatorRegex, separatorRegex);
     }
 
-    protected Optional<Document> getFormItemFromHtml(org.jsoup.nodes.Document htmlDocument, Pattern beginRegex, Pattern endRegex) {
+    protected List<Document> getFormItemsFromHtml(org.jsoup.nodes.Document htmlDocument, Pattern beginRegex, Pattern endRegex) {
+        List<Document> documents = new ArrayList<>();
+
+
         boolean match = false;
-        StringBuilder content = new StringBuilder();
+        var content = new StringBuilder();
         for (Element e : htmlDocument.getAllElements()) {
-            if (endRegex.matcher(e.text()).matches()) {
-                e.remove();
-                return Optional.of(new Document(content.toString()));
+            if (match && endRegex.matcher(e.ownText()).matches()) {
+                documents.add(new Document(content.toString()));
+                match = false;
+                content = new StringBuilder();
+            }
+            if (beginRegex.matcher(e.ownText()).matches()) {
+                match = true;
             }
             if (match) {
                 content.append(' ');
                 content.append(e.ownText());
             }
-            if (beginRegex.matcher(e.text()).matches()) {
-                match = true;
-            }
-            e.remove();
         }
-        return Optional.empty();
+        return documents;
     }
 
 

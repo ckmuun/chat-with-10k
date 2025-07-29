@@ -34,7 +34,7 @@ class ParsingServiceTest {
 
         assertThat(documents).isNotNull();
         assertThat(documents.size()).isGreaterThan(0);
-        assertThat(documents.size()).isEqualTo(17);
+        assertThat(documents.size()).isEqualTo(22);
     }
 
 
@@ -45,7 +45,14 @@ class ParsingServiceTest {
         assertThat(pattern.matcher("Item 2. Properties").matches()).isTrue();
         assertThat(pattern.matcher("Item 1A. Risk Factors").matches()).isTrue();
         assertThat(pattern.matcher("Item 1A. Risk-Factors").matches()).isTrue();
+        assertThat(pattern.matcher("Item 6. [Reserved]").matches()).isTrue();
+        assertThat(pattern.matcher("Item 7. Management’s Discussion and Analysis of Financial Condition and Results of Operations").matches()).isTrue();
+        assertThat(pattern.matcher("Item 1C. Cybersecurity").matches()).isTrue();
         assertThat(pattern.matcher("Item 1A Risk Factors").matches()).isTrue();
+        assertThat(pattern.matcher("Item 9B. Other Information").matches()).isTrue();
+        assertThat(pattern.matcher("Item 10. Directors, Executive Officers and Corporate Governance").matches()).isTrue();
+        assertThat(pattern.matcher("Item 11. Executive Compensation").matches()).isTrue();
+        assertThat(pattern.matcher("Item 5. Market for Registrant’s, Common Equity, Related Stockholder Matters and Issuer Purchases of Equity Securities").matches()).isTrue();
         assertThat(pattern.matcher("Item 16 Something").matches()).isTrue();
     }
 
