@@ -14,13 +14,14 @@ import net.thisptr.jackson.jq.module.loaders.BuiltinModuleLoader;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static de.koware.cfs.chatwith10k.config.Constants.*;
+import static de.koware.cfs.chatwith10k.util.Constants.*;
 
 @Service
 @Slf4j
@@ -37,21 +38,21 @@ public class DownloadService {
         rootScope.setModuleLoader(BuiltinModuleLoader.getInstance());
     }
 
-    public Mono<List<CompanyTickerDto>> getCompanyTickers() {
+    public Flux<CompanyTickerDto> getCompanyTickers() {
         return webClient.get()
                 .uri(SEC_BASE + TICKER_FILE_PATH)
                 .retrieve()
                 .bodyToMono(String.class)
-                .map(this::parseCompanyTickerDtos);
+                .flatMapIterable(this::parseCompanyTickerDtos);
     }
 
-    public Mono<List<CompanyFilingMetadataDto>> getCompanyFilings(String cik) {
+    public Flux<CompanyFilingMetadataDto> getCompanyFilings(String cik) {
         cik = addLeadingToZeroesToCik(cik);
         return webClient.get()
                 .uri(SEC_BASE_DATA + "/submissions/CIK{cik}.json", cik)
                 .retrieve()
                 .bodyToMono(String.class)
-                .map(this::parseFilings);
+                .flatMapIterable(this::parseFilings);
     }
 
     public Mono<CompanyFilingDto> getCompanyFiling(CompanyFilingMetadataDto metadata) {

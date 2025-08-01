@@ -12,23 +12,26 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.regex.Pattern;
 
-import static de.koware.cfs.chatwith10k.config.Constants.FORM_10K_ITEMS_REGEX;
+import static de.koware.cfs.chatwith10k.util.Constants.*;
 
 @Service
 @Slf4j
 public class ParsingService {
 
-
     /*
         Create a list of Spring AI documents from an Edgar form.
      */
-    public List<Document> partitionEdgarForm(CompanyFilingDto companyFilingDto) throws IOException {
+    public List<Document> convertEdgarFormToSpringAiDocuments(CompanyFilingDto companyFilingDto) {
         List<Document> documents = new ArrayList<>();
 
-        var htmlDocument = Jsoup.parse(companyFilingDto.file(), "UTF-8", "");
+        org.jsoup.nodes.Document htmlDocument;
+        try {
+            htmlDocument = Jsoup.parse(companyFilingDto.file(), "UTF-8", "");
+        } catch (IOException ioe) {
+            throw new RuntimeException();
+        }
 
         byte[] xbrl = this.getXbrlHeader(htmlDocument);
         htmlDocument = this.stripFormHtml(htmlDocument);
@@ -39,8 +42,8 @@ public class ParsingService {
         ));
 
         // Items of the form. Currently only 10-K supported. TODO add schemas for other edgar forms
-        if (!companyFilingDto.metadata().form().equals("10-K")) {
-            throw new IllegalArgumentException("Currently only 10-K forms supported");
+        if (!companyFilingDto.metadata().form().equals(TEN_K_FORM)) {
+            throw new IllegalArgumentException("Currently only %s forms supported".formatted(TEN_K_FORM));
         }
 
         var formItems = getFormItemsFromHtml(htmlDocument, Pattern.compile(FORM_10K_ITEMS_REGEX));
@@ -54,7 +57,6 @@ public class ParsingService {
 
     protected List<Document> getFormItemsFromHtml(org.jsoup.nodes.Document htmlDocument, Pattern beginRegex, Pattern endRegex) {
         List<Document> documents = new ArrayList<>();
-
 
         boolean match = false;
         var content = new StringBuilder();
@@ -77,8 +79,8 @@ public class ParsingService {
 
 
     protected byte[] getXbrlHeader(org.jsoup.nodes.Document htmlDocument) {
-        var xbrlItems = htmlDocument.getElementsByTag("ix:header");
-        htmlDocument.getElementsByTag("ix:header").remove();
+        var xbrlItems = htmlDocument.getElementsByTag(IX_HEADER);
+        htmlDocument.getElementsByTag(IX_HEADER).remove();
         return xbrlItems.html().getBytes(StandardCharsets.UTF_8);
     }
 

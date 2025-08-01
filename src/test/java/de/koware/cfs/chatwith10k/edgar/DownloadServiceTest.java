@@ -24,8 +24,7 @@ class DownloadServiceTest {
 
     @Test
     void getCompanyTickers_basic() {
-        var resp = downloadService.getCompanyTickers()
-                .block();
+        var resp = downloadService.getCompanyTickers().blockLast();
         log.info("resp={}", resp);
     }
 
@@ -105,7 +104,7 @@ class DownloadServiceTest {
     void fetchFilings_3M() {
 
         var cik = "66740";
-        var filings = downloadService.getCompanyFilings(cik).block();
+        var filings = downloadService.getCompanyFilings(cik).collectList().block();
 
         assertNotNull(filings);
         assertEquals(1000, filings.size());

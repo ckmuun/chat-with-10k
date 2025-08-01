@@ -1,6 +1,6 @@
 package de.koware.cfs.chatwith10k.edgar;
 
-import de.koware.cfs.chatwith10k.config.Constants;
+import de.koware.cfs.chatwith10k.util.Constants;
 import org.jsoup.Jsoup;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.document.Document;
@@ -25,7 +25,7 @@ class ParsingServiceTest {
     void formItemExtraction_basic() throws IOException {
         var resource = new ClassPathResource("MMM.html");
 
-        List<Document> documents = parsingService.partitionEdgarForm(
+        List<Document> documents = parsingService.convertEdgarFormToSpringAiDocuments(
                 new CompanyFilingDto(
                         CompanyFilingMetadataDto.builder().form("10-K").build(),
                         resource.getInputStream()

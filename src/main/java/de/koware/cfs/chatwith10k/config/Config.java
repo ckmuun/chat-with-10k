@@ -1,4 +1,4 @@
-package de.koware.cfs.chatwith10k.edgar;
+package de.koware.cfs.chatwith10k.config;
 
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.ollama.OllamaEmbeddingModel;
