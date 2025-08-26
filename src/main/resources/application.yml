@@ -11,8 +11,12 @@ spring:
       base-url: http://localhost:11434
       chat:
         model: gemma3n:e4b
+        options:
+          temperature: 0.0
       embedding:
         model: nomic-embed-text
+        options:
+          temperature: 0.0
     vectorstore:
       pgvector:
         index-type: HNSW
@@ -25,3 +29,4 @@ spring:
   config:
     activate:
       on-profile: dev
+

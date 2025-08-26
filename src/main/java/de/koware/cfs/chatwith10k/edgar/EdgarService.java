@@ -7,12 +7,18 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+/*
+    This service connects the edgar form download with functionality
+    for parsing documents into Spring AI documents and persisting them.
+ */
+
 @Service
-public class EdgarService {
+public class  EdgarService {
 
     private final DownloadService downloadService;
     private final ParsingService parsingService;
     private final DocumentService documentService;
+
 
     public EdgarService(DownloadService downloadService, ParsingService parsingService, DocumentService documentService) {
         this.downloadService = downloadService;

@@ -12,11 +12,11 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @Slf4j
-public class RagController {
+public class EdgarController {
 
     private final EdgarService edgarService;
 
-    public RagController(EdgarService edgarService) {
+    public EdgarController(EdgarService edgarService) {
         this.edgarService = edgarService;
     }
 

@@ -12,6 +12,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.List;
 
+import static de.koware.cfs.chatwith10k.util.TestConstants.SIMPLE_FOUNDING_YEAR_QUESTION;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -57,8 +58,12 @@ class ChatServiceTest {
         assertTrue(answer.contains("red and blue tartan pattern"));
     }
 
+    /*
+        Currently (2025-08-24) this test takes quite a few minutes to complete.
+        More fine-grained chunking is required.
+     */
     @Test
-    void sendMessage_rag_10K_simple() {
+    void sendMessage_rag_10K_simple_no_chunking() {
         // Make sure the document content is not contained in the model's training data.
         var doc = new Document(TestConstants.MMM_FORM_1A_BUSINESS_SHORT);
 
@@ -66,7 +71,7 @@ class ChatServiceTest {
                 List.of(doc)
         );
 
-        var answer = chatService.ragMessage("When and where was the 3M company founded?")
+        var answer = chatService.ragMessage(SIMPLE_FOUNDING_YEAR_QUESTION)
                 .reduce((a, b) -> a + b)
                 .block();
 

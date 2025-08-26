@@ -1,6 +1,12 @@
 package de.koware.cfs.chatwith10k.util;
 
+import java.io.IOException;
+
 public class TestConstants {
+
+
+
+public static final String SIMPLE_FOUNDING_YEAR_QUESTION = "When and where was the 3M company founded?";
 
     public static final String MMM_FORM_1A_BUSINESS_SHORT = """
              Item 1. Business  3M Company was incorporated in 1929 under the laws of the State of Delaware to continue operations begun in 1902.\s
