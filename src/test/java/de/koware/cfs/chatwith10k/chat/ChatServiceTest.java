@@ -58,10 +58,6 @@ class ChatServiceTest {
         assertTrue(answer.contains("red and blue tartan pattern"));
     }
 
-    /*
-        Currently (2025-08-24) this test takes quite a few minutes to complete.
-        More fine-grained chunking is required.
-     */
     @Test
     void sendMessage_rag_10K_simple_no_chunking() {
         // Make sure the document content is not contained in the model's training data.

@@ -26,6 +26,7 @@ public class ChatServiceIT {
 
 
     @Autowired
+    @SuppressWarnings("unused")
     VectorStore vectorStore;
 
     @Autowired
@@ -56,6 +57,8 @@ public class ChatServiceIT {
 
     @Test
     void send_message_10k_rag_simple_chunking() {
+        // Add the short document to the vector store.
+        // It's chunked before being embedded and persisted.
         var doc = new Document(TestConstants.MMM_FORM_1A_BUSINESS_SHORT);
         documentService.addDocument(doc);
 

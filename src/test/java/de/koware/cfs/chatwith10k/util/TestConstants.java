@@ -1,7 +1,5 @@
 package de.koware.cfs.chatwith10k.util;
 
-import java.io.IOException;
-
 public class TestConstants {
 
 
